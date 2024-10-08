@@ -1,27 +1,25 @@
-from flask import Flask, render_template, request
+import streamlit as st
 import joblib
+import pandas as pd
 
+# Load the trained model
 model = joblib.load('linear_regression_model.pkl')
 
+# Set up the Streamlit interface
+st.title("Sales Prediction App")
 
-app = Flask(__name__)
+# Create input fields
+tv = st.number_input("TV Advertising Budget (in thousands)", min_value=0.0, step=0.1)
+radio = st.number_input("Radio Advertising Budget (in thousands)", min_value=0.0, step=0.1)
+newspaper = st.number_input("Newspaper Advertising Budget (in thousands)", min_value=0.0, step=0.1)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# Prediction button
+if st.button("Predict Sales"):
+    # Create the feature array
+    features = [[tv, radio, newspaper]]
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    if request.method == 'POST':
+    # Make a prediction
+    prediction = model.predict(features)[0]
 
-        tv = float(request.form['tv'])
-        radio = float(request.form['radio'])
-        newspaper = float(request.form['newspaper'])
-
-        features = [[tv, radio, newspaper]]
-        prediction = model.predict(features)[0]
-
-        return render_template('result.html', prediction=round(prediction, 2))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    # Display the result
+    st.success(f"Predicted Sales: {round(prediction, 2)} units")
